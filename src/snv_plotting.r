@@ -16,24 +16,34 @@ if(requireNamespace("fmsb", quietly = TRUE)) library(fmsb)
 # -----------------------
 # Dataset
 # -----------------------
+library(tidyverse)
+library(lubridate)
+library(stringr)
+library(scales)
+
+# Fresh dataset with updated NGC-MDx walltime, CPU time, and node hours
 bench_raw <- tribble(
-  ~Acronym, ~version, ~n_samples, ~infra, ~walltime, ~node_hours, ~cpu_time, ~gpu_time, ~cpu_alloc,
-  "NGC-MDx1-M","5.7",7,"queue","33h56m06s",33.94,"601h09m10s","0","per_process",
-  "NGC-MDx1-S","5.7",7,"local","31h02m25s",31.04,"617h50m38s","0","50",
-  "NGC-MDx2-M","5.7",7,"queue","27h45m58s",27.75,"371h57m45s","0","per_process",
-  "NGC-MDx2-S","5.7",7,"local","23h58m51s",23.96,"347h10m39s","0","50",
-  "GeG-PB1-M","4.6.0-1",7,"queue","0h26m40s",1.84,"206","14.7","112",
-  "GeG-PB2-M","4.6.0-1",7,"queue","0h23m19s",1.72,"193","13.8","112",
-  "GeG-NFCS1-M","3.7.0",7,"queue","6h30m09s",22.39,"0h37m58s","0","112",
-  "GeG-NFCS2-M","3.7.0",7,"queue","7h08m29s",19.72,"0h39m22s","0","112",
-  "GeG-NFCS3-M","3.7.0",7,"queue","7h25m24s",22.78,"0h47m27s","0","112",
-  "GeG-NFCS4-M","3.7.0",7,"queue","6h37m34s",20.47,"0h37m43s","0","112",
-  "GeG-NFCS5-M","3.7.0",7,"queue","4h35m13s",18.39,"0h36m19s","147.12","112",
-  "GeC-NFCS1-M","3.7.0",7,"queue","5h18m44s",22.21,"0h22m28s","0","96",
-  "GeC-NFCS2-M","3.7.0",7,"queue","6h07m01s",22.48,"0h24m11s","0","96",
-  "NGC-NFCS1-M","3.7.1",7,"queue","4h53m00s",10.08,"32h16m06s","0","variable",
-  "NGC-NFCS2-M","3.7.1",7,"queue","3h35m00s",7.92,"25h21m54s","0","variable",
-  "NGC-SC-S","3.7.1",7,"queue","0h14m00s",1.63,"4h12m19s","0","96"
+  ~Acronym,       ~version,  ~n_samples, ~infra,      ~walltime,     ~node_hours, ~cpu_time,     ~gpu_time, ~cpu_alloc,
+  
+  # Updated NGC-MDx entries
+  "NGC-MDx1-M",   "5.7",     7,          "queue",    "6h04m12s",    48.54,       "627h42m00s", "0",       "per_process",
+  "NGC-MDx1-S",   "5.7",     7,          "local",    "5h48m00s",    5.80,        "619h43m12s", "0",       "50",
+  "NGC-MDx2-M",   "5.7",     7,          "queue",    "4h24m36s",    26.46,       "366h06m36s", "0",       "per_process",
+  "NGC-MDx2-S",   "5.7",     7,          "local",    "3h58m48s",    3.98,        "362h33m36s", "0",       "50",
+  
+  # Rest of the dataset unchanged
+  "GeG-PB1-M",    "4.6.0-1", 7,          "queue",    "0h26m40s",    1.84,        "206h00m00s", "14.7",    "112",
+  "GeG-PB2-M",    "4.6.0-1", 7,          "queue",    "0h23m19s",    1.72,        "193h00m00s", "13.8",    "112",
+  "GeG-NFCS1-M",  "3.7.0",   7,          "queue",    "6h30m09s",    22.39,       "0h37m58s",   "0",       "112",
+  "GeG-NFCS2-M",  "3.7.0",   7,          "queue",    "7h08m29s",    19.72,       "0h39m22s",   "0",       "112",
+  "GeG-NFCS3-M",  "3.7.0",   7,          "queue",    "7h25m24s",    22.78,       "0h47m27s",   "0",       "112",
+  "GeG-NFCS4-M",  "3.7.0",   7,          "queue",    "6h37m34s",    20.47,       "0h37m43s",   "0",       "112",
+  "GeG-NFCS5-M",  "3.7.0",   7,          "queue",    "4h35m13s",    18.39,       "0h36m19s",   "147.12",  "112",
+  "GeC-NFCS1-M",  "3.7.0",   7,          "queue",    "5h18m44s",    22.21,       "0h22m28s",   "0",       "96",
+  "GeC-NFCS2-M",  "3.7.0",   7,          "queue",    "6h07m01s",    22.48,       "0h24m11s",   "0",       "96",
+  "NGC-NFCS1-M",  "3.7.1",   7,          "queue",    "4h53m00s",    10.08,       "32h16m06s",  "0",       "variable",
+  "NGC-NFCS2-M",  "3.7.1",   7,          "queue",    "3h35m00s",    7.92,        "25h21m54s",  "0",       "variable",
+  "NGC-SC-S",     "3.7.1",   7,          "queue",    "0h14m00s",    1.63,        "4h12m19s",   "0",       "96"
 )
 
 # -----------------------
@@ -97,6 +107,8 @@ theme_paper <- theme_minimal(base_size = 14) +
 # =========================
 # FIGURES
 # =========================
+
+
 
 # 1) Walltime Comparison
 ggplot(bench, aes(x = reorder(Acronym, walltime_h), y = walltime_h, fill = infra)) +
