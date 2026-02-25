@@ -216,6 +216,37 @@ ggplot(bench, aes(x=family, y=node_h, fill=family)) +
 ggsave("figure_cumulative_node_hours.pdf", width=6, height=6)
 # Analysis: Shows which pipeline family dominates total compute usage.
 
+
+# 13) Node Hours vs Walltime
+ggplot(bench, aes(x = walltime_h, y = node_h, color = infra, shape = is_gpu)) +
+  geom_point(size = 4) +
+  geom_smooth(method = "lm", se = FALSE, linetype = "dashed") +
+  labs(
+    title = "Node Hours vs Walltime",
+    x = "Walltime (hours)",
+    y = "Node Hours",
+    color = "Infrastructure",
+    shape = "GPU Used"
+  ) +
+  theme_paper
+
+ggsave("figure_node_vs_walltime.pdf", width = 8, height = 6)
+
+# 14 )Node Hours vs CPU Hours
+ggplot(bench, aes(x = cpu_h, y = node_h, color = infra, shape = is_gpu)) +
+  geom_point(size = 4) +
+  geom_smooth(method = "lm", se = FALSE, linetype = "dashed") +
+  labs(
+    title = "Node Hours vs CPU Hours",
+    x = "CPU Hours",
+    y = "Node Hours",
+    color = "Infrastructure",
+    shape = "GPU Used"
+  ) +
+  theme_paper
+
+ggsave("figure_node_vs_cpu.pdf", width = 8, height = 6)
+
 # ===========================================
 # End of Script
 # ===========================================
