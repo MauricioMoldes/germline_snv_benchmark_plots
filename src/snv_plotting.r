@@ -21,10 +21,10 @@ bench_raw <- tribble(
   ~Acronym,       ~version,  ~n_samples, ~infra,           ~walltime,     ~node_hours, ~cpu_time,      ~gpu_time, ~cpu_alloc,
   
   # Updated NGC-MDx entries
-  "MDx1-NGC-M",   "5.7",     7,          "queue/flexible", "6h04m01s",    48.54,       "627h42m53s",  0,         "per_process",
-  "MDx1-NGC-S",   "5.7",     7,          "local/fixed",    "5h48m08s",    5.80,        "619h43m02s",  0,         "50",
-  "MDx2-NGC-M",   "5.7",     7,          "queue/flexible", "4h25m38s",    26.46,       "366h07m41s",  0,         "per_process",
-  "MDx2-NGC-S",   "5.7",     7,          "local/fixed",    "3h59m54s",    3.98,        "362h33m24s",  0,         "50",
+  "MDx1-NGC-M",   "5.7",     7,          "queue/flexible", "6h04m01s",    3.27,       "627h42m53s",  0,         "per_process",
+  "MDx1-NGC-S",   "5.7",     7,          "local/fixed",    "5h48m08s",    3.23,        "619h43m02s",  0,         "50",
+  "MDx2-NGC-M",   "5.7",     7,          "queue/flexible", "4h25m38s",    1.91,       "366h07m41s",  0,         "per_process",
+  "MDx2-NGC-S",   "5.7",     7,          "local/fixed",    "3h59m54s",    1.89,        "362h33m24s",  0,         "50",
   
   # GeG entries
   "PB1-GeG-M",    "4.6.0-1", 7,          "queue/flexible", "0h26m40s",    1.84,        "206h00m00s",  14.7,      "112",
@@ -45,8 +45,10 @@ bench_raw <- tribble(
   "SC-NGC-M",     "3.7.1",   7,          "queue/flexible", "0h14m00s",    1.63,        "4h12m19s",    0,         "96",
   
   # ICA-DR-M (cloud)
-  "ICA-DR-M",     "4.3.13",  7,          "cloud",          "2h14m00s",    NA,          NA,            NA,        NA
+  "ICA-DR-M",     "4.3.13",  7,          "dragen-box",          "2h14m00s",    NA,          NA,            NA,        NA
 )
+
+
 
 # -----------------------
 # Helper Functions
@@ -118,6 +120,7 @@ ggplot(bench, aes(x = reorder(Acronym, walltime_h), y = walltime_h, fill = infra
   labs(title="Walltime Comparison", x="Pipeline", y="Walltime (hours)", fill="Infrastructure Type") +
   theme_paper
 ggsave("figure_walltime.pdf", width=8, height=6)
+ggsave("figure_walltime.png", width = 8, height = 6, dpi = 300)
 
 # 2) Total Node Hours
 ggplot(bench, aes(x = reorder(Acronym, node_h), y = node_h, fill = is_gpu)) +
