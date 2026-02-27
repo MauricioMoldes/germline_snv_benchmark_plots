@@ -12,6 +12,8 @@ library(scales)
 library(tidyverse)
 if(requireNamespace("fmsb", quietly = TRUE)) library(fmsb)  # optional for radar chart
 
+library(patchwork)
+
 bench_raw <- tribble(
   ~Acronym,       ~version,  ~n_samples, ~infra,               ~walltime,     ~node_hours, ~cpu_time,        ~gpu_time, ~cpu_alloc,
   
@@ -103,7 +105,7 @@ theme_paper <- theme_minimal(base_size = 14) +
 # =========================
 
 # 1) Walltime Comparison
-ggplot(bench, aes(x = reorder(Acronym, walltime_h), y = walltime_h, fill = infra)) +
+walltime <- ggplot(bench, aes(x = reorder(Acronym, walltime_h), y = walltime_h, fill = infra)) +
   geom_col(na.rm=TRUE) + coord_flip() +
   labs(title="Walltime Comparison", x="Pipeline", y="Walltime (hours)", fill="Infrastructure Type") +
   theme_paper
@@ -132,11 +134,12 @@ ggplot(bench, aes(x = reorder(Acronym, walltime_per_sample), y = walltime_per_sa
 ggsave("figure_walltime_per_sample.pdf", width=8, height=6)
 
 # 5) Speedup relative to slowest
-ggplot(bench, aes(x = reorder(Acronym, speedup), y = speedup)) +
+speedup <- ggplot(bench, aes(x = reorder(Acronym, speedup), y = speedup)) +
   geom_col(fill="steelblue", na.rm=TRUE) + coord_flip() +
   labs(title="Speedup Relative to Slowest Pipeline", x="Pipeline", y="Speedup (×)") +
   theme_paper
 ggsave("figure_speedup.pdf", width=8, height=6)
+ggsave("figure_speedup.png", width = 8, height = 6, dpi = 300)
 
 # 6) Infrastructure Effect (Queue vs Local)
 ggplot(bench, aes(x = infra, y = walltime_h, fill=infra)) +
@@ -234,6 +237,17 @@ ggplot(bench, aes(x = cpu_h, y = node_h, color = infra, shape = is_gpu)) +
   labs(title = "Node Hours vs CPU Hours", x = "CPU Hours", y = "Node Hours", color = "Infrastructure", shape = "GPU Used") +
   theme_paper
 ggsave("figure_node_vs_cpu.pdf", width = 8, height = 6)
+
+
+# 16) Combined Figures 
+
+# Combine the plots vertically
+combined <- walltime / speedup  
+
+# Save combined figure
+ggsave("figure_combined.pdf", combined, width = 10, height = 12)
+ggsave("figure_combined.png", combined, width = 10, height = 12, dpi = 300)
+
 
 # ===========================================
 # End of Script
