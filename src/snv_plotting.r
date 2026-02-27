@@ -238,6 +238,15 @@ ggplot(bench, aes(x = cpu_h, y = node_h, color = infra, shape = is_gpu)) +
   theme_paper
 ggsave("figure_node_vs_cpu.pdf", width = 8, height = 6)
 
+# 17) Combined Figures 
+
+# Combine the plots vertically
+combined <- walltime / speedup  
+
+# Save combined figure
+ggsave("figure_combined.pdf", combined, width = 10, height = 12)
+ggsave("figure_combined.png", combined, width = 10, height = 12, dpi = 300)
+
 
 library(ggplot2)
 library(dplyr)
@@ -283,14 +292,40 @@ ggplot(bar_data, aes(x = reorder(Acronym, Value), y = Value, fill = Resource)) +
 ggsave("resources_stacked.pdf", width = 8, height = 6)
 ggsave("resources_stacked.png", width = 8, height = 6, dpi = 300)
 
-# 17) Combined Figures 
 
-# Combine the plots vertically
-combined <- walltime / speedup  
+# ordered by walltime 
 
-# Save combined figure
-ggsave("figure_combined.pdf", combined, width = 10, height = 12)
-ggsave("figure_combined.png", combined, width = 10, height = 12, dpi = 300)
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+bar_data <- bench %>%
+  select(Acronym, walltime_h, cpu_h) %>%  # only the two metrics we care about
+  pivot_longer(
+    cols = -Acronym,
+    names_to = "Metric",
+    values_to = "Value"
+  )
+
+bar_data_subset$Acronym <- factor(
+  bar_data_subset$Acronym,
+  levels = bench$Acronym[order(bench$walltime_h)]
+)
+
+ggplot(bar_data_subset, aes(x = Acronym, y = Value)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  facet_wrap(~ Metric, scales = "free_x") +
+  labs(title = "Walltime and CPU Usage by Pipeline",
+       x = "Pipeline",
+       y = "Hours") +
+  theme_paper
+
+ggsave("walltime_cpu_faceted.pdf", width = 8, height = 6)
+ggsave("walltime_cpu_faceted.png", width = 8, height = 6, dpi = 300)
+
+
 
 
 # ===========================================
