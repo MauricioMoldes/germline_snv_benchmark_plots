@@ -300,19 +300,34 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 
+# Pivot to long format
 bar_data <- bench %>%
-  select(Acronym, walltime_h, cpu_h) %>%  # only the two metrics we care about
+  select(Acronym, walltime_h, cpu_h) %>%
   pivot_longer(
     cols = -Acronym,
     names_to = "Metric",
     values_to = "Value"
   )
 
+# Keep only the two metrics (optional)
+bar_data_subset <- bar_data %>%
+  filter(Metric %in% c("walltime_h", "cpu_h"))
+
+# 1️⃣ Order pipelines by walltime
+# This sets the same order in both facets
 bar_data_subset$Acronym <- factor(
   bar_data_subset$Acronym,
   levels = bench$Acronym[order(bench$walltime_h)]
 )
 
+# 2️⃣ Order facets so Walltime is on the left
+bar_data_subset$Metric <- factor(
+  bar_data_subset$Metric,
+  levels = c("walltime_h", "cpu_h"),
+  labels = c("Walltime (hours)", "CPU time (hours)")
+)
+
+# 3️⃣ Plot faceted horizontal bars
 ggplot(bar_data_subset, aes(x = Acronym, y = Value)) +
   geom_col(fill = "steelblue") +
   coord_flip() +
@@ -322,6 +337,7 @@ ggplot(bar_data_subset, aes(x = Acronym, y = Value)) +
        y = "Hours") +
   theme_paper
 
+# 4️⃣ Save
 ggsave("walltime_cpu_faceted.pdf", width = 8, height = 6)
 ggsave("walltime_cpu_faceted.png", width = 8, height = 6, dpi = 300)
 
