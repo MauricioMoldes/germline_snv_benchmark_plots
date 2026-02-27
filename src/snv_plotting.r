@@ -10,52 +10,40 @@ library(stringr)
 library(lubridate)
 library(scales)
 library(tidyverse)
-# Optional (for radar chart)
-if(requireNamespace("fmsb", quietly = TRUE)) library(fmsb)
+if(requireNamespace("fmsb", quietly = TRUE)) library(fmsb)  # optional for radar chart
 
-
-# -----------------------
-# Dataset (updated)
-# -----------------------
 bench_raw <- tribble(
-  ~Acronym,       ~version,  ~n_samples, ~infra,           ~walltime,     ~node_hours, ~cpu_time,      ~gpu_time, ~cpu_alloc,
+  ~Acronym,       ~version,  ~n_samples, ~infra,               ~walltime,     ~node_hours, ~cpu_time,        ~gpu_time, ~cpu_alloc,
   
-  # Updated NGC-MDx entries
-  "MDx1-NGC-M",   "5.7",     7,          "queue/flexible", "6h04m01s",    3.27,       "627h42m53s",  0,         "per_process",
-  "MDx1-NGC-S",   "5.7",     7,          "local/fixed",    "5h48m08s",    3.23,        "619h43m02s",  0,         "50",
-  "MDx2-NGC-M",   "5.7",     7,          "queue/flexible", "4h25m38s",    1.91,       "366h07m41s",  0,         "per_process",
-  "MDx2-NGC-S",   "5.7",     7,          "local/fixed",    "3h59m54s",    1.89,        "362h33m24s",  0,         "50",
+  "MDx1-NGC-M",   "5.7",     7,          "queue/flexible",     "6h04m01s",    3.27,       "627h41m53s",    "0",         "per_process",
+  "MDx1-NGC-S",   "5.7",     7,          "local/fixed",        "5h48m08s",    3.23,       "619h43m02s",    "0",         "192",
+  "MDx2-NGC-M",   "5.7",     7,          "queue/flexible",     "4h24m38s",    1.91,       "366h06m41s",    "0",         "per_process",
+  "MDx2-NGC-S",   "5.7",     7,          "local/fixed",        "3h58m54s",    1.89,       "362h33m24s",    "0",         "192",
   
-  # GeG entries
-  "PB1-GeG-M",    "4.6.0-1", 7,          "queue/flexible", "0h26m40s",    1.84,        "206h00m00s",  14.7,      "112",
-  "PB2-GeG-M",    "4.6.0-1", 7,          "queue/flexible", "0h23m19s",    1.72,        "193h00m00s",  13.8,      "112",
-  "NFCS1-GeG-M",  "3.7.0",   7,          "queue/flexible", "6h30m09s",    22.39,       "0h37m58s",    0,         "112",
-  "NFCS2-GeG-M",  "3.7.0",   7,          "queue/flexible", "7h08m29s",    19.72,       "0h39m22s",    0,         "112",
-  "NFCS3-GeG-M",  "3.7.0",   7,          "queue/flexible", "7h25m24s",    22.78,       "0h47m27s",    0,         "112",
-  "NFCS4-GeG-M",  "3.7.0",   7,          "queue/flexible", "6h37m34s",    20.47,       "0h37m43s",    0,         "112",
-  "NFCS5-GeG-M",  "3.7.0",   7,          "queue/flexible", "4h35m13s",    18.39,       "0h36m19s",    147.12,    "112",
+  "PB1-GeG-M",    "4.6.0-1", 7,          "queue/flexible",     "0h25m40s",    1.84,       "169h40m48s",    "12h07m12s", "112",
+  "PB2-GeG-M",    "4.6.0-1", 7,          "queue/flexible",     "0h23m19s",    1.72,       "163h21m54s",    "11h40m12s", "112",
+  "NFCS1-GeG-M",  "3.7.0",   7,          "queue/flexible",     "6h30m09s",    22.39,      "2278h18m00s",   "0",         "112",
+  "NFCS2-GeG-M",  "3.7.0",   7,          "queue/flexible",     "7h08m29s",    19.72,      "2362h42m00s",   "0",         "112",
+  "NFCS3-GeG-M",  "3.7.0",   7,          "queue/flexible",     "7h25m24s",    22.78,      "2847h06m00s",   "0",         "112",
+  "NFCS4-GeG-M",  "3.7.0",   7,          "queue/flexible",     "6h37m34s",    20.47,      "2263h48m00s",   "0",         "112",
+  "NFCS5-GeG-M",  "3.7.0",   7,          "queue/flexible",     "4h35m13s",    18.39,      "1348h00m00s",   "14h49m12s", "112",
   
-  # GeC entries
-  "NFCS6-GeC-M",  "3.7.0",   7,          "queue/flexible", "5h18m44s",    22.21,       "0h22m28s",    0,         "96",
-  "NFCS7-GeC-M",  "3.7.0",   7,          "queue/flexible", "6h07m01s",    22.48,       "0h24m11s",    0,         "96",
+  "NFCS6-GeC-M",  "3.7.0",   7,          "queue/flexible",     "5h18m44s",    22.21,      "1451h06m00s",   "0",         "96",
+  "NFCS7-GeC-M",  "3.7.0",   7,          "queue/flexible",     "6h07m01s",    22.48,      "2179h24m00s",   "0",         "96",
   
-  # NGC entries
-  "NFCS8-NGC-M",  "3.7.1",   7,          "queue/flexible", "4h53m00s",    10.08,       "32h16m06s",   0,         NA,
-  "NFCS9-NGC-M",  "3.7.1",   7,          "queue/flexible", "3h35m00s",    7.92,        "25h21m54s",   0,         "variable",
-  "SC-NGC-M",     "3.7.1",   7,          "queue/flexible", "0h14m00s",    1.63,        "4h12m19s",    0,         "96",
+  "NFCS8-NGC-M",  "3.7.1",   7,          "queue/flexible",     "4h53m12s",    10.08,      "1936h06m00s",   "0",         NA,
+  "NFCS9-NGC-M",  "3.7.1",   7,          "queue/flexible",     "3h35m46s",    7.92,       "1521h54m00s",   "0",         "variable",
+  "SC-NGC-M",     "3.7.1",   7,          "queue/flexible",     "0h16m28s",    1.92,       "368h51m12s",    "0",         "96",
   
-  # ICA-DR-M (cloud)
-  "ICA-DR-M",     "4.3.13",  7,          "dragen-box",          "2h14m00s",    NA,          NA,            NA,        NA
+  "DR-DOP-M",     "4.3.13",  7,          "on-premise server",  "2h14m00s",    NA,         NA,              NA,        NA
 )
 
-
-
 # -----------------------
-# Helper Functions
+# Helper Function
 # -----------------------
 convert_to_hours <- function(x) {
   sapply(x, function(xi) {
-    if(is.na(xi)) return(NA)           # <-- handle NA safely
+    if(is.na(xi)) return(NA)
     if(str_detect(xi, "h|m|s")) {
       h <- as.numeric(str_extract(xi, "\\d+(?=h)"))
       m <- as.numeric(str_extract(xi, "\\d+(?=m)"))
@@ -81,7 +69,7 @@ bench <- bench_raw %>%
     cpu_alloc_num = as.numeric(ifelse(cpu_alloc %in% c("per_process","variable"), NA, cpu_alloc))
   )
 
-# Speedup relative to slowest pipeline
+# Speedup relative to slowest
 baseline <- max(bench$walltime_h, na.rm = TRUE)
 bench <- bench %>% mutate(speedup = baseline / walltime_h)
 
@@ -96,7 +84,7 @@ bench <- bench %>%
     str_detect(Acronym, "NGC") ~ "NGC",
     str_detect(Acronym, "GeG") ~ "GeG",
     str_detect(Acronym, "GeC") ~ "GeC",
-    str_detect(Acronym, "ICA") ~ "ICA",
+    str_detect(Acronym, "DR")  ~ "ICA",
     TRUE ~ "Other"
   ))
 
@@ -187,44 +175,28 @@ ggplot(bench %>% filter(!is.na(gpu_speedup)), aes(x=reorder(Acronym, gpu_speedup
   theme_paper
 ggsave("figure_gpu_speedup.pdf", width=8, height=6)
 
-# 11) Radar Plot (with clear pipeline names)
+# 11) Radar Plot
 if("fmsb" %in% rownames(installed.packages())){
-
-  # Keep only numeric columns for radar chart
   radar_data <- bench %>%
     select(Acronym, walltime_h, node_h, cpu_h, gpu_h, walltime_per_sample) %>%
     replace_na(list(walltime_h=0, node_h=0, cpu_h=0, gpu_h=0, walltime_per_sample=0)) %>%
     column_to_rownames("Acronym")
   
-  # Normalize metrics to 0–1
   radar_norm <- as.data.frame(lapply(radar_data, function(x) x/max(x, na.rm=TRUE)))
-  
-  # Add max and min rows required by fmsb
   radar_norm <- rbind(rep(1,ncol(radar_norm)), rep(0,ncol(radar_norm)), radar_norm)
+  pipeline_names <- rownames(radar_norm)[-c(1,2)]
+  colors <- rainbow(length(pipeline_names))
   
-  # Colors for each pipeline
-  pipeline_names <- rownames(radar_norm)[-c(1,2)]  # exclude min/max
-  n_pipelines <- length(pipeline_names)
-  colors <- rainbow(n_pipelines)
-  
-  # Plot radar chart to screen
   radarchart(radar_norm, axistype=1,
-             pcol=colors,
-             pfcol=adjustcolor(colors, alpha.f=0.2),
-             plwd=2, cglcol="grey", cglty=1,
-             axislabcol="grey", vlcex=0.8,
+             pcol=colors, pfcol=adjustcolor(colors, alpha.f=0.2),
+             plwd=2, cglcol="grey", cglty=1, axislabcol="grey", vlcex=0.8,
              title="Multi-metric Radar Plot of Pipelines")
-  
-  # Add legend with actual pipeline names
   legend("topright", legend=pipeline_names, col=colors, lty=1, lwd=2, cex=0.8, bty="n")
   
-  # Save to PDF
   pdf("figure_radar_plot.pdf", width=8, height=8)
   radarchart(radar_norm, axistype=1,
-             pcol=colors,
-             pfcol=adjustcolor(colors, alpha.f=0.2),
-             plwd=2, cglcol="grey", cglty=1,
-             axislabcol="grey", vlcex=0.8,
+             pcol=colors, pfcol=adjustcolor(colors, alpha.f=0.2),
+             plwd=2, cglcol="grey", cglty=1, axislabcol="grey", vlcex=0.8,
              title="Multi-metric Radar Plot of Pipelines")
   legend("topright", legend=pipeline_names, col=colors, lty=1, lwd=2, cex=0.8, bty="n")
   dev.off()
