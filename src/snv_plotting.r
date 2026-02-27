@@ -239,7 +239,51 @@ ggplot(bench, aes(x = cpu_h, y = node_h, color = infra, shape = is_gpu)) +
 ggsave("figure_node_vs_cpu.pdf", width = 8, height = 6)
 
 
-# 16) Combined Figures 
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+
+bar_data <- bench %>%
+  select(Acronym, walltime_h, node_h, cpu_h, gpu_h) %>%
+  pivot_longer(cols = -Acronym,
+               names_to = "Resource",
+               values_to = "Value")
+
+ggplot(bar_data, aes(x = reorder(Acronym, Value), y = Value, fill = Resource)) +
+  geom_col(position = "dodge") +
+  coord_flip() +
+  labs(title = "Pipeline Resource Usage",
+       x = "Pipeline",
+       y = "Resource Usage (hours)",
+       fill = "Resource Type") +
+  theme_paper
+ggsave("resources_group.pdf", width = 8, height = 6)
+ggsave("resources_group.png", width = 8, height = 6, dpi = 300)
+
+ggplot(bar_data, aes(x = reorder(Acronym, Value), y = Value)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  facet_wrap(~ Resource, scales = "free_x") +
+  labs(title = "Pipeline Resource Usage by Type",
+       x = "Pipeline",
+       y = "Hours") +
+  theme_paper
+ggsave("resources_faceted.pdf", width = 8, height = 6)
+ggsave("resources_faceted.png", width = 8, height = 6, dpi = 300)
+
+ggplot(bar_data, aes(x = reorder(Acronym, Value), y = Value, fill = Resource)) +
+  geom_col() +
+  coord_flip() +
+  labs(title = "Total Resource Composition per Pipeline",
+       x = "Pipeline",
+       y = "Total Hours",
+       fill = "Resource Type") +
+  theme_paper
+ggsave("resources_stacked.pdf", width = 8, height = 6)
+ggsave("resources_stacked.png", width = 8, height = 6, dpi = 300)
+
+# 17) Combined Figures 
 
 # Combine the plots vertically
 combined <- walltime / speedup  
