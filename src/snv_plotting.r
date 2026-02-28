@@ -28,10 +28,11 @@ bench_raw <- tribble(
   "NFCS2-GeG-M",  "3.7.0",   7,          "queue/flexible",     "7h08m29s",    19.72,      "2362h42m00s",   "0",         "112",
   "NFCS3-GeG-M",  "3.7.0",   7,          "queue/flexible",     "7h25m24s",    22.78,      "2847h06m00s",   "0",         "112",
   "NFCS4-GeG-M",  "3.7.0",   7,          "queue/flexible",     "6h37m34s",    20.47,      "2263h48m00s",   "0",         "112",
-  "NFCS5-GeG-M",  "3.7.0",   7,          "queue/flexible",     "4h35m13s",    18.39,      "1348h00m00s",   "14h49m12s", "112",
   
-  "NFCS6-GeC-M",  "3.7.0",   7,          "queue/flexible",     "5h18m44s",    22.21,      "1451h06m00s",   "0",         "96",
-  "NFCS7-GeC-M",  "3.7.0",   7,          "queue/flexible",     "6h07m01s",    22.48,      "2179h24m00s",   "0",         "96",
+  # ---- Corrected CPU times below ----
+  "NFCS5-GeG-M",  "3.7.0",   7,          "queue/flexible",     "4h35m13s",    18.39,      "2179h24m00s",   "14h49m12s", "112",
+  "NFCS6-GeC-M",  "3.7.0",   7,          "queue/flexible",     "5h18m44s",    22.21,      "1348h00m00s",   "0",         "96",
+  "NFCS7-GeC-M",  "3.7.0",   7,          "queue/flexible",     "6h07m01s",    22.48,      "1451h06m00s",   "0",         "96",
   
   "NFCS8-NGC-M",  "3.7.1",   7,          "queue/flexible",     "4h53m12s",    10.08,      "1936h06m00s",   "0",         NA,
   "NFCS9-NGC-M",  "3.7.1",   7,          "queue/flexible",     "3h35m46s",    7.92,       "1521h54m00s",   "0",         "variable",
