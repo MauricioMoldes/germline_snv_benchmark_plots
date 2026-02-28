@@ -38,7 +38,7 @@ bench_raw <- tribble(
   "NFCS9-NGC-M",  "3.7.1",   7,          "queue/flexible",     "3h35m46s",    7.92,       "1521h54m00s",   "0",         "variable",
   "SC-NGC-M",     "3.7.1",   7,          "queue/flexible",     "0h16m28s",    1.92,       "368h51m12s",    "0",         "96",
   
-  "DR-DOP-M",     "4.3.13",  7,          "on-premise server",  "1h06m00s",    NA,         NA,              NA,        NA
+  "DR-DOP-M",     "4.3.13",  7,          "on-premise server",  "1h06m00s",    NA,         "52h48m00s",              NA,        NA
 )
 
 # -----------------------
